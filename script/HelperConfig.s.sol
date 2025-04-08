@@ -4,43 +4,34 @@ pragma solidity ^0.8.19;
 import {Script} from "forge-std/Script.sol";
 import {MockV3Aggregator} from "../test/mocks/MockV3Aggregator.sol";
 
-contract HelperConfig is Script {
-    NetworkConfig public activeNetworkConfig;
-
-    uint8 private constant DECIMALS = 8;
-    int256 private constant INITIAL_PRICE = 2000e8; // 2000 USD with 8 decimals
-
-    struct NetworkConfig {
+abstract contract NetworkConfig is Script {
+    struct Config {
         address priceFeed;
     }
 
-    constructor() {
-        if (block.chainid == 11155111) {
-            activeNetworkConfig = getSepoliaEthConfig();
-        } else if (block.chainid == 1) {
-            activeNetworkConfig = getMainnetEthConfig();
-        } else {
-            activeNetworkConfig = getAnvliEthConfig();
-        }
-    }
+    function getConfig() public virtual returns (Config memory);
+}
 
-    function getSepoliaEthConfig() public pure returns (NetworkConfig memory) {
-        NetworkConfig memory sepoliaConfig = NetworkConfig({
-            priceFeed: 0x694AA1769357215DE4FAC081bf1f309aDC325306
-        });
-        return sepoliaConfig;
+contract SepoliaNetworkConfig is NetworkConfig {
+    function getConfig() public pure override returns (Config memory) {
+        return Config({priceFeed: 0x694AA1769357215DE4FAC081bf1f309aDC325306});
     }
+}
 
-    function getMainnetEthConfig() public pure returns (NetworkConfig memory) {
-        NetworkConfig memory mainnetConfig = NetworkConfig({
-            priceFeed: 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
-        });
-        return mainnetConfig;
+contract MainnetNetworkConfig is NetworkConfig {
+    function getConfig() public pure override returns (Config memory) {
+        return Config({priceFeed: 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419});
     }
+}
 
-    function getAnvliEthConfig() public returns (NetworkConfig memory) {
-        if (activeNetworkConfig.priceFeed != address(0)) {
-            return activeNetworkConfig;
+contract AnvilNetworkConfig is NetworkConfig {
+    uint8 private constant DECIMALS = 8;
+    int256 private constant INITIAL_PRICE = 2000e8; // 2000 USD with 8 decimals
+    Config private s_config;
+
+    function getConfig() public override returns (Config memory) {
+        if (s_config.priceFeed != address(0)) {
+            return s_config;
         }
 
         vm.startBroadcast();
@@ -50,9 +41,29 @@ contract HelperConfig is Script {
         );
         vm.stopBroadcast();
 
-        NetworkConfig memory anvliConfig = NetworkConfig({
-            priceFeed: address(mockPriceFeed)
-        });
-        return anvliConfig;
+        s_config = Config({priceFeed: address(mockPriceFeed)});
+
+        return s_config;
+    }
+}
+
+contract HelperConfig is Script {
+    NetworkConfig public activeNetworkConfig;
+
+    constructor() {
+        if (block.chainid == 11155111) {
+            activeNetworkConfig = new SepoliaNetworkConfig();
+        } else if (block.chainid == 1) {
+            activeNetworkConfig = new MainnetNetworkConfig();
+        } else {
+            activeNetworkConfig = new AnvilNetworkConfig();
+        }
+    }
+
+    function getActiveNetworkConfig()
+        public
+        returns (NetworkConfig.Config memory)
+    {
+        return activeNetworkConfig.getConfig();
     }
 }
