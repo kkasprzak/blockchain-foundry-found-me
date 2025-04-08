@@ -35,10 +35,7 @@ contract AnvilNetworkConfig is NetworkConfig {
         }
 
         vm.startBroadcast();
-        MockV3Aggregator mockPriceFeed = new MockV3Aggregator(
-            DECIMALS,
-            INITIAL_PRICE
-        );
+        MockV3Aggregator mockPriceFeed = new MockV3Aggregator(DECIMALS, INITIAL_PRICE);
         vm.stopBroadcast();
 
         s_config = Config({priceFeed: address(mockPriceFeed)});
@@ -60,10 +57,7 @@ contract HelperConfig is Script {
         }
     }
 
-    function getActiveNetworkConfig()
-        public
-        returns (NetworkConfig.Config memory)
-    {
+    function getActiveNetworkConfig() public returns (NetworkConfig.Config memory) {
         return activeNetworkConfig.getConfig();
     }
 }
