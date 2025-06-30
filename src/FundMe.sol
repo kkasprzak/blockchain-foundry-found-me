@@ -10,8 +10,8 @@ error NotOwner();
 contract FundMe {
     using PriceConverter for uint256;
 
-    mapping(address => uint256) public s_addressToAmountFunded;
-    address[] public s_funders;
+    mapping(address => uint256) private s_addressToAmountFunded;
+    address[] private s_funders;
 
     // Could we make this constant?  /* hint: no! We should make it immutable! */
     address public /* immutable */ i_owner;
@@ -83,6 +83,10 @@ contract FundMe {
 
     function getFunders(uint256 index) external view returns (address) {
         return s_funders[index];
+    }
+
+    function getOwner() external view returns (address) {
+        return i_owner;
     }
 }
 

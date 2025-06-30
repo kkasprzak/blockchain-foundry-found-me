@@ -1,66 +1,60 @@
-## Foundry
+# FundMe
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+FundMe is a Solidity smart contract built with Foundry that allows users to fund the contract with ETH, enforcing a minimum USD contribution via Chainlink price feeds. Each funder's contribution is recorded, and only the contract owner can withdraw the accumulated funds.
 
-Foundry consists of:
+## Prerequisites
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+- [Foundry](https://book.getfoundry.sh/) (forge, cast, anvil)
+- An RPC endpoint (Infura, Alchemy, etc.) and a funded private key for deployments
 
-## Documentation
+## Installation
 
-https://book.getfoundry.sh/
+1. Clone the repository
+   ```bash
+   git clone https://github.com/your-username/foundry-found-me-f23.git
+   cd foundry-found-me-f23
+   ```
+2. Install dependencies
+   ```bash
+   forge install
+   ```
 
 ## Usage
 
 ### Build
 
-```shell
-$ forge build
+Compile the contracts:
+```bash
+forge build
 ```
 
 ### Test
 
-```shell
-$ forge test
+Run the full test suite:
+```bash
+forge test
 ```
 
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
+Generate gas-usage snapshots:
+```bash
+forge snapshot
 ```
 
 ### Deploy
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+Deploy to your target network (e.g. Sepolia):
+```bash
+forge script script/DeployFundMe.s.sol:DeployFundMe \
+  --rpc-url <YOUR_RPC_URL> \
+  --private-key <YOUR_PRIVATE_KEY> \
+  --broadcast
 ```
 
-### Cast
+## Contributing
 
-```shell
-$ cast <subcommand>
-```
+Pull requests are welcome! For major changes, please open an issue first to discuss what you'd like to change.
+Ensure any new code is covered by tests and that `forge fmt` and `forge lint` pass before submitting.
 
-### Help
+## License
 
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+MIT
