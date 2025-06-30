@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install Foundry
+      uses: foundry-rs/foundry-toolchain@v1
+      with:
+        version: nightly
+
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.foundry/cache
+          lib/
+        key: ${{ runner.os }}-foundry-${{ hashFiles('**/foundry.toml', '**/remappings.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-foundry-
+
+    - name: Install dependencies
+      run: forge install
+
+    - name: Check formatting
+      run: forge fmt --check
+
+    - name: Build contracts
+      run: forge build --sizes
+
+    - name: Run unit tests
+      run: forge test --match-path "test/unit/*" -vvv
+
+    - name: Run integration tests
+      run: forge test --match-path "test/integration/*" -vvv
+
+    - name: Generate gas snapshots
+      run: forge snapshot --check
+
+    - name: Run coverage
+      run: forge coverage --report lcov
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./lcov.info
+        flags: unittests
+        name: foundry-coverage
+        fail_ci_if_error: false
